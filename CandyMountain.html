@@ -62,11 +62,13 @@ var vie = 3 ;
 var power = false ; 
 
 var victoire = false ;
+var setfond = false ;
 
 // Pense a changer les assets genre le Background.jpg et Bob.png
 
 function preload ()
 {
+    this.load.image("ecran_Titre","asset/Ecran_Titre.png"),
     this.load.image("bg","asset/Background.png"),
     this.load.image("Game_Over","asset/Game_Over.png"),
     this.load.image("Victoire","asset/Victoire.png"),
@@ -331,14 +333,14 @@ function create ()
     bgVictoire = this.add.image(645,359,"Victoire");
     bgVictoire.setScrollFactor(0,0);
     bgVictoire.setVisible(false);
+
+    ecranTitre = this.add.image(645,359,"ecran_Titre");
+    ecranTitre.setScrollFactor(0,0);
+   
 };
 function update ()
 {
-
-    if (power == true)
-    {
-        this.physics.world.removeCollider(invisible);
-    }
+ 
 
 
     if(vie<=0){
@@ -379,6 +381,19 @@ function update ()
     });
 
     if (paddleConnected){
+        if (paddle.B)
+    {
+        setfond = true;
+    }
+
+    if (setfond == true){
+        ecranTitre.setVisible(false);
+    }
+    
+        if (power == true)
+    {
+        this.physics.world.removeCollider(invisible);
+    }
         if (paddle.R2)
     {       
         
@@ -455,6 +470,19 @@ function update ()
  
     }
     else {
+        if (buttonA.isDown)
+    {
+        setfond = true;
+    }
+
+    if (setfond == true){
+        ecranTitre.setVisible(false);
+    }
+    
+        if (power == true)
+    {
+        this.physics.world.removeCollider(invisible);
+    }
         if (cursors.right.isDown)
     {       
         
