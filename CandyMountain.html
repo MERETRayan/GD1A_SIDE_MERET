@@ -22,7 +22,7 @@ var config = {
         default: 'arcade',
             arcade:{   
                 gravity: {y: 300 },
-                debug:true
+                debug:false
             }
     },
     scene: {
@@ -322,7 +322,8 @@ function create ()
     gameOver = this.add.image(645,359,"Game_Over");
     gameOver.setScrollFactor(0,0);
     gameOver.setVisible(false);
-    bgVictoire = this.add.image(645,359,"Game_Over");
+
+    bgVictoire = this.add.image(645,359,"Victoire");
     bgVictoire.setScrollFactor(0,0);
     bgVictoire.setVisible(false);
 };
