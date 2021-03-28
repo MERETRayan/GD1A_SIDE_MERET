@@ -1,5 +1,6 @@
 Manette 
 
+O ou B = Valider 
 X ou A selon la manette = Sauter 
 R2 = aller à droite 
 L2 = aller à gauche 
@@ -7,6 +8,7 @@ L2 = aller à gauche
 
 Clavier 
 
+A = Valider 
 Flèche du haut = sauter 
 Flèche de droite = aller à droite 
 Flèche de gauche = aller à gauche 
