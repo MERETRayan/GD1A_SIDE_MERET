@@ -161,10 +161,15 @@ function create ()
     this.physics.world.setBounds(0, 0, 3560, 1391);
     bg = this.add.image(0, 0, "bg").setOrigin(0, 0);
     player = this.physics.add.sprite(400,1100,"persoSprt");
+
+
     ennemie = this.physics.add.sprite(2200,520,"ennemie");
     ennemie.body.setAllowGravity(false);
     ennemie2 = this.physics.add.sprite(2600,1200,"ennemie");
     ennemie2.body.setAllowGravity(false);
+
+
+    
     player.body.setSize(120,95);
     drapeau = this.physics.add.sprite(3355,1250,"drapeau");
     drapeau.body.setAllowGravity(false);
@@ -333,14 +338,6 @@ function update ()
     if (power == true)
     {
         this.physics.world.removeCollider(invisible);
-        //invisible1.disableBody(true,true);
-        var tween = this.tweens.add({
-        targets: invisible1,
-        y: 0,
-        paused: false,
-        yoyo: false,
-        repeat: -1
-    });
     }
 
 
