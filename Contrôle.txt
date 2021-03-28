@@ -1,0 +1,12 @@
+Manette 
+
+X ou A selon la manette = Sauter 
+R2 = aller à droite 
+L2 = aller à gauche 
+
+
+Clavier 
+
+Flèche du haut = sauter 
+Flèche de droite = aller à droite 
+Flèche de gauche = aller à gauche 

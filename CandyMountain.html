@@ -1,0 +1,538 @@
+<!doctype html> 
+<html lang="en"> 
+<head> 
+    <meta charset="UTF-8" />
+    <title>Making your first Phaser 3 Game - Part 1</title>
+    <script src="//cdn.jsdelivr.net/npm/phaser@3.11.0/dist/phaser.js"></script>
+    <style type="text/css">
+        body {
+            margin: 0;
+        }
+    </style>
+</head>
+<body>
+
+<script type="text/javascript">
+
+var config = {
+    type: Phaser.AUTO,
+    width: 1280,
+    height: 720,
+    physics: {
+        default: 'arcade',
+            arcade:{   
+                gravity: {y: 300 },
+                debug:true
+            }
+    },
+    scene: {
+        preload: preload,
+        create: create,
+        update: update
+    },
+    input:{gamepad:true}
+};
+
+
+var game = new Phaser.Game(config);
+var player ;
+var cursors;
+var paddle ;
+var paddleConnected = false ;
+
+
+
+
+var finDoubleJump = false ;
+var doubleJump = false ;
+var toucheleSol = false ;
+var toucheMur = false ;
+var sautMural = false ;
+var toucheleMur = false ;
+
+
+var recovery = false;
+var timerRecovery = 0;
+
+var timer = 0 ;
+var recupMur = false;
+
+var vie = 3 ;
+
+var power = false ; 
+
+var victoire = false ;
+
+// Pense a changer les assets genre le Background.jpg et Bob.png
+
+function preload ()
+{
+    this.load.image("bg","asset/Background.png"),
+    this.load.image("Game_Over","asset/Game_Over.png"),
+    this.load.image("Victoire","asset/Victoire.png"),
+    this.load.spritesheet("persoSprt","asset/Slime_spritesheet_1.png" , { frameWidth: 140 , frameHeight: 107 }),
+    this.load.image("powerUp","asset/Bonbon.png");
+    this.load.image("rose","asset/Platforme_Rose.png");
+    this.load.image("rouge","asset/Platforme_Rouge.png");
+    this.load.spritesheet("vie","asset/Vie.png" , { frameWidth: 354 , frameHeight: 131.25 });
+    this.load.spritesheet("ennemie","asset/Ennemi_spriteSheet.png" , {frameWidth: 150 , frameHeight: 150 });
+    this.load.image("mur_rose","asset/Mur_Rose.png");
+    this.load.image("mur_rouge","asset/Mur_Rouge.png");
+    this.load.image("eau","asset/Eau_Verte.png");
+    this.load.image("invisible","asset/Mur_Transparent.png");
+    this.load.spritesheet("drapeau","asset/Drapeau.png" , {frameWidth: 150 , frameHeight: 150 });
+}
+
+
+function Degat(player,ennemie) 
+    {
+        if (vie>0 && recovery==false){
+            vie-=1;
+            if (vie==2){
+                life.anims.play("deux_coeur")
+                player.setTint(0x8224B8);
+                player.setTint(0xF5BAFD);
+                player.setTint(0xBADCFD);
+                player.setTint(0xBAFDC8);
+                player.setTint(0xFABAFD);
+                player.setTint(0xFDBAC7);
+
+        }
+            if (vie==1){
+                life.anims.play("un_coeur")
+                player.setTint(0x8224B8);
+                player.setTint(0xF5BAFD);
+                player.setTint(0xBADCFD);
+                player.setTint(0xBAFDC8);
+                player.setTint(0xFABAFD);
+                player.setTint(0xFDBAC7);
+        }   
+            if (vie==0){
+                life.anims.play("mort")
+                player.setTint(0x8224B8);
+                player.setTint(0xF5BAFD);
+                player.setTint(0xBADCFD);
+                player.setTint(0xBAFDC8);
+                player.setTint(0xFABAFD);
+                player.setTint(0xFDBAC7);
+        }   
+    }
+    recovery=true
+    }
+  
+function toucheSol(player,platforme) 
+    {   
+        if (player.body.touching.down)
+        {
+            toucheleSol = false ;
+            finDoubleJump = false ;
+        }
+        if (player.body.touching.left)
+        {
+            recupMur = true;
+            toucheleMur = false ;
+        }
+        if (player.body.touching.right)
+        {
+            recupMur = true;
+            toucheleMur = false ;
+        }
+    }
+
+function RecupPower(player,powerUp)
+    {
+        powerUp.disableBody(true, true);   
+        power = true ;
+
+    }
+function WaterDamage(player,eau)
+    {
+        vie-=3;  
+        life.anims.play("mort")
+
+    }
+function Fin(player,drapeau)
+    {
+       victoire=true;
+    }
+
+function create ()
+{   
+    this.physics.world.setBounds(0, 0, 3560, 1391);
+    bg = this.add.image(0, 0, "bg").setOrigin(0, 0);
+    player = this.physics.add.sprite(400,1100,"persoSprt");
+    ennemie = this.physics.add.sprite(2200,520,"ennemie");
+    ennemie.body.setAllowGravity(false);
+    ennemie2 = this.physics.add.sprite(2600,1200,"ennemie");
+    ennemie2.body.setAllowGravity(false);
+    player.body.setSize(120,95);
+    drapeau = this.physics.add.sprite(3355,1250,"drapeau");
+    drapeau.body.setAllowGravity(false);
+    
+
+    //player.bodySize(200,200);
+    this.cameras.main.startFollow(player);
+    this.cameras.main.setBounds(0, 0, 3560, 1391);
+    
+    powerUp = this.physics.add.group();
+    powerUp.create(2000,900,"powerUp");
+
+    platforme = this.physics.add.staticGroup();
+    platforme.create(155,1350,"rose");
+    platforme.create(455,1350,"rouge");
+    platforme.create(755,1350,"rose");
+    platforme.create(1055,1350,"rouge");
+    platforme.create(1755,650,"rose");
+    platforme.create(2055,650,"rouge");
+    platforme.create(2455,650,"rouge");
+    platforme.create(2755,650,"rose");
+    platforme.create(2055,1200,"rose");
+    platforme.create(2455,1350,"rose");
+    platforme.create(2755,1350,"rouge");
+    platforme.create(3055,1350,"rose");
+    platforme.create(3355,1350,"rouge");
+    platforme.create(3655,1350,"rose");
+    platforme.create(3155,1000,"rouge");
+    platforme.create(3455,1000,"rose");
+    platforme.create(2855,1000,"rose");
+
+    mur = this.physics.add.staticGroup();
+    mur.create(1255,1200,"mur_rose");
+    mur.create(900,900,"mur_rouge");
+    mur.create(1255,800,"mur_rouge");
+    mur.create(900,500,"mur_rose");
+    mur.create(900,200,"mur_rouge");
+    mur.create(2255,800,"mur_rose");
+    mur.create(2255,1200,"mur_rouge");
+    mur.create(2605,100,"mur_rouge");
+    mur.create(1855,1050,"mur_rouge");
+
+    invisible = this.physics.add.staticGroup();
+    invisible1 = invisible.create(2605,450,"invisible");
+
+    eau = this.physics.add.staticGroup();
+    eau.create(1455,1350,"eau");
+    eau.create(1755,1350,"eau");
+    eau.create(2055,1350,"eau");
+
+    buttonA = this.input.keyboard.addKey(Phaser.Input.Keyboard.KeyCodes.A);
+
+    this.physics.add.collider(player,platforme,toucheSol);
+    this.physics.add.collider(player,powerUp,RecupPower);
+    this.physics.add.collider(ennemie,platforme);
+    this.physics.add.collider(player,eau,WaterDamage);
+    this.physics.add.collider(player,mur,toucheSol);
+    this.physics.add.collider(player,ennemie,Degat);
+    this.physics.add.collider(player,ennemie2,Degat);
+    this.physics.add.collider(powerUp, platforme);
+    this.physics.add.collider(player,drapeau,Fin);
+    invisible = this.physics.add.collider(player, invisible);
+
+    player.setBounce(0.2);
+    player.setCollideWorldBounds(true);
+
+    ennemie.setCollideWorldBounds(true);
+
+    cursors = this.input.keyboard.createCursorKeys();
+
+    this.anims.create({
+            key: '1',
+            frames: [ { key: 'ennemie', frame: 0 } ],
+            frameRate: 10,
+            repeat: -1
+        });
+
+    this.anims.create({
+            key: 'left',
+            frames: this.anims.generateFrameNumbers('persoSprt', { start: 0 , end:4  }),
+            frameRate: 10,
+            repeat: -1
+        });
+
+        this.anims.create({
+            key: 'right',
+            frames: this.anims.generateFrameNumbers('persoSprt', { start: 5, end: 9 }),
+            frameRate: 10,
+            repeat: -1
+        });
+
+        this.anims.create({
+            key: 'full_vie',
+            frames: [ { key: 'vie', frame: 0 } ],
+            frameRate: 10,
+            repeat: -1
+        });
+
+        this.anims.create({
+            key: 'deux_coeur',
+            frames: [ { key: 'vie', frame: 1 } ],
+            frameRate: 10,
+            repeat: -1
+        });
+
+        this.anims.create({
+            key: 'un_coeur',
+            frames: [ { key: 'vie', frame: 2 } ],
+            frameRate: 10,
+            repeat: -1
+        });
+
+        this.anims.create({
+            key: 'mort',
+            frames: [ { key: 'vie', frame: 3 } ],
+            frameRate: 10,
+            repeat: -1
+        });
+
+        this.anims.create({
+            key: 'ennemi_left',
+            frames: this.anims.generateFrameNumbers('ennemie', { start: 0, end: 4 }),
+            frameRate: 10,
+            repeat: -1
+        });
+        this.anims.create({
+            key: 'ennemi_right',
+            frames: this.anims.generateFrameNumbers('ennemie', { start: 5, end: 9 }),
+            frameRate: 10,
+            repeat: -1
+        });
+
+        var tween = this.tweens.add({
+        targets: ennemie,
+        x: 1700,
+        paused: false,
+        yoyo: true,
+        repeat: -1
+    });
+    var tween = this.tweens.add({
+        targets: ennemie2,
+        y: 800,
+        paused: false,
+        yoyo: true,
+        repeat: -1
+    });
+
+
+
+
+    life = this.physics.add.sprite(200,100,"vie");
+    life.body.setAllowGravity(false);
+    life.setScrollFactor(0,0);
+
+    gameOver = this.add.image(645,359,"Game_Over");
+    gameOver.setScrollFactor(0,0);
+    gameOver.setVisible(false);
+    bgVictoire = this.add.image(645,359,"Game_Over");
+    bgVictoire.setScrollFactor(0,0);
+    bgVictoire.setVisible(false);
+};
+function update ()
+{
+
+    if (power == true)
+    {
+        this.physics.world.removeCollider(invisible);
+        //invisible1.disableBody(true,true);
+        var tween = this.tweens.add({
+        targets: invisible1,
+        y: 0,
+        paused: false,
+        yoyo: false,
+        repeat: -1
+    });
+    }
+
+
+    if(vie<=0){
+        power=false;
+        player.disableBody(true,true);
+        this.physics.pause();
+        gameOver.setVisible(true);
+        return;
+    }
+
+    if (victoire==true)
+    {
+        bgVictoire.setVisible(true);
+        this.physics.pause();
+        return;
+    }
+
+    if(recovery == true){
+        timerRecovery = timerRecovery + 1
+        if(timerRecovery >= 50){
+            recovery = false
+            player.clearTint();
+            timerRecovery = 0
+        }
+    }
+
+    if (ennemie.x >= 300){
+        ennemie.anims.play("ennemi_left",true);
+    }
+    if (ennemie.x <= 300){
+        ennemie.anims.play("ennemi_right",true);
+    }
+    
+
+    this.input.gamepad.once('connected', function (pad){
+        paddleConnected=true;
+        paddle=pad;
+    });
+
+    if (paddleConnected){
+        if (paddle.R2)
+    {       
+        
+            player.anims.play('right', true);
+
+            player.setVelocityX(500);
+            if (paddle.A && player.body.touching.down)
+            {
+                player.setVelocityY(-500);
+            }
+        
+    }
+
+        if (paddle.L2)
+    {
+            player.anims.play('left', true);
+            player.setVelocityX(-500);
+            if (paddle.A && player.body.touching.down)
+            {
+                player.setVelocityY(-500);
+            }
+
+    }
+    if (paddle.R2 == false && paddle.L2 == false )
+    {
+        player.setVelocityX(0);
+    }
+
+    if (paddle.R2 && paddle.L2)
+    {
+        player.setVelocityX(0);
+    }
+
+
+    if (paddle.A && toucheleSol==false)
+    {
+        player.setVelocityY(-330);
+        toucheleSol=true ;
+    }
+
+    if (paddle.A == false && toucheleSol == true && finDoubleJump == false){
+        doubleJump = true;
+    }
+
+    if (paddle.A && doubleJump == true){
+        player.setVelocityY(-330);
+        finDoubleJump = true;
+        doubleJump = false;
+    }     
+
+
+
+    if(recupMur == true){
+        timer = timer + 1
+        if(timer >= 50){
+            recupMur = false
+            timer = 0
+        }
+    }
+
+    if (paddle.A && toucheleMur == false && recupMur==false){
+        player.anims.play('right', true);
+        player.setVelocityY(-330);
+        player.setVelocityX(-500);
+        toucheleMur=true;
+    }    
+    
+    if (paddle.A  && toucheleMur == false && recupMur==false){
+        player.anims.play('left', true);
+        player.setVelocityY(-330);
+        player.setVelocityX(500);
+        toucheleMur=true;
+    }     
+ 
+    }
+    else {
+        if (cursors.right.isDown)
+    {       
+        
+            player.anims.play('right', true);
+
+            player.setVelocityX(500);
+            if (cursors.up.isDown && player.body.touching.down)
+            {
+                player.setVelocityY(-500);
+            }
+        
+    }
+
+        if (cursors.left.isDown )
+    {
+            player.anims.play('left', true);
+            player.setVelocityX(-500);
+            if (cursors.up.isDown && player.body.touching.down)
+            {
+                player.setVelocityY(-500);
+            }
+
+    }
+    if (cursors.left.isUp && cursors.right.isUp)
+    {
+        player.setVelocityX(0);
+    }
+
+
+    if (cursors.up.isDown && toucheleSol==false)
+    {
+        player.setVelocityY(-330);
+        toucheleSol=true ;
+    }
+
+    if (cursors.up.isUp && toucheleSol == true && finDoubleJump == false){
+        doubleJump = true;
+    }
+
+    if (cursors.up.isDown && doubleJump == true){
+        player.setVelocityY(-330);
+        finDoubleJump = true;
+        doubleJump = false;
+    }     
+
+
+
+    if(recupMur == true){
+        timer = timer + 1
+        if(timer >= 50){
+            recupMur = false
+            timer = 0
+        }
+    }
+
+    if (cursors.up.isDown && toucheleMur == false && recupMur==false){
+        player.anims.play('right', true);
+        player.setVelocityY(-330);
+        player.setVelocityX(-500);
+        toucheleMur=true;
+    }    
+    
+    if (cursors.up.isDown  && toucheleMur == false && recupMur==false){
+        player.anims.play('left', true);
+        player.setVelocityY(-330);
+        player.setVelocityX(500);
+        toucheleMur=true;
+    }     
+ 
+    
+    }
+    
+}
+
+
+</script>
+
+</body>
+</html>
